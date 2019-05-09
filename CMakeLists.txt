@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(gpd_ros)
 
+
+list( APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )
+message( STATUS "CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH} )
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -12,15 +16,8 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-## System dependencies are found with CMake's conventions
-find_library(GPD_LIB NAMES gpd PATHS /usr/local/lib PATH_SUFFIXES lib NO_DEFAULT_PATH)
-if (GPD_LIB)
-  message(STATUS "Library GPD found in ${GPD_LIB}")
-else()
-  message(FATAL_ERROR "Library GPD not found")
-endif()
-include_directories(${GPD_LIB_INCLUDE_DIR})
-message(STATUS "gpd_include_dir: ${GPD_LIB_INCLUDE_DIR}")
+# GBD
+find_package(gpd REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-O3 -fopenmp -fPIC -Wno-deprecated -Wenum-compare -Wno-ignored-attributes -std=c++14")
 
@@ -66,6 +63,9 @@ add_library(${PROJECT_NAME}_grasp_plotter src/${PROJECT_NAME}/grasp_plotter.cpp)
 ## Declare a C++ executable
 add_executable(${PROJECT_NAME}_detect_grasps src/gpd_ros/grasp_detection_node.cpp)
 add_executable(${PROJECT_NAME}_detect_grasps_server src/gpd_ros/grasp_detection_server.cpp)
+
+add_dependencies(${PROJECT_NAME}_detect_grasps ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_detect_grasps_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
 set_target_properties(${PROJECT_NAME}_detect_grasps PROPERTIES OUTPUT_NAME detect_grasps PREFIX "")
